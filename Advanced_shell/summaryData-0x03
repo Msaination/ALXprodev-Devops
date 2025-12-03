@@ -19,6 +19,9 @@ for file in *.json; do
     formatted_height=$(echo "$height" | awk '{print $1/10}')
     formatted_weight=$(echo "$weight" | awk '{print $1/10}')
 
+    # Use sed to capitalize the name (example usage of sed)
+    formatted_name=$(echo "$name" | sed 's/.*/\u&/')
+
     # Append to CSV
     echo "$name,$formatted_height,$formatted_weight" >> "$OUTPUT_FILE"
 done
