@@ -10,17 +10,32 @@ API_URL="https://pokeapi.co/api/v2/pokemon"
 for pokemon in "${POKEMONS[@]}"; do
     echo "Fetching data for $pokemon..."
 
-    # Make API request and save to file
-    curl -s "$API_URL/$pokemon" -o "${pokemon}.json"
+    success=false
 
-    # Check if request succeeded
-    if [ $? -eq 0 ]; then
-        echo "✅ Saved ${pokemon}.json"
-    else
-        echo "❌ Failed to fetch $pokemon" >> errors.txt
+    # Retry up to 3 times
+    for attempt in {1..3}; do
+        echo "Attempt $attempt for $pokemon..."
+        
+        # Make API request and capture HTTP status
+        status_code=$(curl -s -o "${pokemon}.json" -w "%{http_code}" "$API_URL/$pokemon")
+
+        if [ "$status_code" -eq 200 ]; then
+            echo "✅ Successfully saved ${pokemon}.json"
+            success=true
+            break
+        else
+            echo "⚠️ Request failed with status $status_code (attempt $attempt)"
+            sleep 2  # short delay before retry
+        fi
+    done
+
+    # If all attempts failed, log error
+    if [ "$success" = false ]; then
+        echo "❌ Failed to fetch $pokemon after 3 attempts" >> errors.txt
+        rm -f "${pokemon}.json"  # remove incomplete file
     fi
 
-    # Delay to avoid rate-limiting (2 seconds)
+    # Delay to avoid rate-limiting between different Pokémon
     sleep 2
 done
 
