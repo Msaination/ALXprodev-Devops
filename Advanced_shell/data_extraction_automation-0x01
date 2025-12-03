@@ -1,21 +1,17 @@
 #!/bin/bash
 
-# Input JSON file
 INPUT_FILE="data.json"
 
-# Extract fields using jq
-NAME=$(jq -r '.name' "$INPUT_FILE")
-HEIGHT=$(jq -r '.height' "$INPUT_FILE")
-WEIGHT=$(jq -r '.weight' "$INPUT_FILE")
-TYPE=$(jq -r '.types[0].type.name' "$INPUT_FILE")
+# Extract values with jq
+name=$(jq -r '.name' "$INPUT_FILE")
+height=$(jq -r '.height' "$INPUT_FILE")
+weight=$(jq -r '.weight' "$INPUT_FILE")
+type=$(jq -r '.types[0].type.name' "$INPUT_FILE")
 
-# Convert height (decimetres → metres) and weight (hectograms → kg)
-HEIGHT_M=$(echo "$HEIGHT" | awk '{print $1/10}')
-WEIGHT_KG=$(echo "$WEIGHT" | awk '{print $1/10}')
+# Convert units
+formatted_height=$(echo "$height" | awk '{print $1/10}')
+formatted_weight=$(echo "$weight" | awk '{print $1/10}')
 
-# Format output with sed (capitalize type if needed)
-TYPE_FORMATTED=$(echo "$TYPE" | sed 's/.*/\u&/')
-
-# Final human-readable sentence
-echo "$NAME is of type $TYPE_FORMATTED, weighs ${WEIGHT_KG}kg, and is ${HEIGHT_M}m tall."
+# Print EXACT expected format
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
 
