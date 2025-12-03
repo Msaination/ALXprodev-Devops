@@ -3,19 +3,28 @@
 # List of Pokémon to fetch
 POKEMONS=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 
-# Base API URL
 API_URL="https://pokeapi.co/api/v2/pokemon"
 
-# Loop through each Pokémon and run curl in the background
+# Start background jobs for each Pokémon
 for pokemon in "${POKEMONS[@]}"; do
     echo "Fetching data for $pokemon..."
-    
-    # Run curl in background and redirect output to a file
     curl -s "$API_URL/$pokemon" -o "${pokemon}.json" &
 done
 
-# Wait for all background processes to complete
-wait
+# Show running background jobs
+jobs
+
+# Capture all background job PIDs
+pids=$(jobs -p)
+
+# Example: if you wanted to cancel one job (say the first), you can kill it
+# (This demonstrates use of kill; in practice you might skip this line)
+# kill -9 $(echo $pids | awk '{print $1}')
+
+# Wait for all remaining jobs to finish
+for pid in $pids; do
+    wait $pid
+done
 
 echo "✅ All Pokémon data fetched successfully."
 
