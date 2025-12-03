@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Input: All JSON files generated in Task 2 (e.g., bulbasaur.json, ivysaur.json, etc.)
+# Output: CSV file with name, height, weight + average height and weight
+
+OUTPUT_FILE="pokemon_report.csv"
+
+# Write CSV header
+echo "Name,Height(m),Weight(kg)" > "$OUTPUT_FILE"
+
+# Loop through all JSON files in current directory
+for file in *.json; do
+    # Extract values using jq
+    name=$(jq -r '.name' "$file")
+    height=$(jq -r '.height' "$file")   # height in decimetres
+    weight=$(jq -r '.weight' "$file")   # weight in hectograms
+
+    # Convert units: decimetres → metres, hectograms → kilograms
+    formatted_height=$(echo "$height" | awk '{print $1/10}')
+    formatted_weight=$(echo "$weight" | awk '{print $1/10}')
+
+    # Append to CSV
+    echo "$name,$formatted_height,$formatted_weight" >> "$OUTPUT_FILE"
+done
+
+# Calculate averages using awk
+awk -F',' 'NR>1 {h+=$2; w+=$3; count++} END {print "Average Height(m): " h/count; print "Average Weight(kg): " w/count}' "$OUTPUT_FILE"
+
